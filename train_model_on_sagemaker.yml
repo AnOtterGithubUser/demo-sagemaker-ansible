@@ -1,0 +1,43 @@
+# AWS Playbook
+---
+
+- name: Train model on AWS SageMaker
+  hosts: local
+  gather_facts: False
+  environment:
+    AWS_ACCESS_KEY_ID: "AKIAZDHFWCEF6X3DQDMF"
+    AWS_SECRET_ACCESS_KEY: "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"
+  # Credentials are set as environment variables
+  # Could also be written in ansible vault
+  tasks:
+  # You need to pull the prebuilt docker image from ECR
+  - name: Pull pre-built docker image for tensorflow (TOD)
+    shell: echo "Pull pre-built docker image from ECR"
+  - name: Build training image
+    shell: docker build . -t demo-sagemaker-image
+  - name: Get session credentials
+    sts_session_token:
+      duration_seconds: 3600
+    register: session_credentials
+  - debug: msg="{{ session_credentials }}"
+  - name: Assume FullSageMaker role
+    sts_assume_role:
+      role_arn: "{{ AWS_ROLE_ARN }}"
+      role_session_name: "{{ AWS_ROLE_NAME }}"
+    register: aws_role
+  - debug: msg="{{ aws_role }}"
+  - name: list s3 buckets # Just for testing the read writes where granted
+    aws_s3_bucket_info:
+      aws_access_key: "{{ aws_role.sts_creds.access_key }}"
+      aws_secret_key: "{{ aws_role.sts_creds.secret_key }}"
+      security_token: "{{ aws_role.sts_creds.session_token }}"
+    register: s3_buckets
+  - debug: msg="{{ s3_buckets }}" # Should return testfullsagemakerrole bucket info
+  - name: Push docker image to AWS ECR (TODO)
+    shell: echo "Send docker image to AWS ECR"
+  - name: Build sagemaker training instance (TODO)
+    shell: echo "Build sagemaker training instance"
+  - name: Run sagemaker training instance from docker image (TODO)
+    shell: echo "Run sagemaker training instance"
+
+

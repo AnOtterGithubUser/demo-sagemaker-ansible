@@ -1,0 +1,4 @@
+AWS_ROLE_ARN: arn:aws:iam::625399435531:role/FullSageMaker
+AWS_ROLE_NAME: FullSageMaker
+AWS_REGION: eu-west-1
+DOCKER_IMAGE_NAME: demo-sagemaker
