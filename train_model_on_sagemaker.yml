@@ -4,23 +4,30 @@
 - name: Train model on AWS SageMaker
   hosts: local
   gather_facts: False
-  environment:
-    AWS_ACCESS_KEY_ID: "{{ AWS_ACCESS_KEY }}"
-    AWS_SECRET_ACCESS_KEY: "{{ AWS_SECRET_KEY }}"
-  # Credentials are set as environment variables
-  # Could also be written in ansible vault
   tasks:
-  # You need to pull the prebuilt docker image from ECR
-  - name: Pull pre-built docker image for tensorflow (TOD)
-    shell: echo "Pull pre-built docker image from ECR"
-  - name: Build training image
-    shell: docker build . -t demo-sagemaker-image
   - name: Assume FullSageMaker role
     sts_assume_role:
       role_arn: "{{ AWS_ROLE_ARN }}"
       role_session_name: "{{ AWS_ROLE_NAME }}"
+    environment:
+      AWS_ACCESS_KEY_ID: "{{ AWS_ACCESS_KEY }}"
+      AWS_SECRET_ACCESS_KEY: "{{ AWS_SECRET_KEY }}"
     register: aws_role
   - debug: msg="{{ aws_role }}"
+  - name: Amazon ECR authentication
+    command: "aws ecr get-login-password --region {{ AWS_REGION }}"
+    environment:
+      AWS_ACCESS_KEY_ID: "{{ aws_role.sts_creds.access_key }}"
+      AWS_SECRET_ACCESS_KEY: "{{ aws_role.sts_creds.secret_key }}"
+      AWS_SECURITY_TOKEN: "{{ aws_role.sts_creds.session_token }}"
+    register: ecr_login
+  - debug: msg="{{ ecr_login }}"
+  - name: Docker login
+    command: "docker login --username AWS --password {{ ecr_login.stdout }} 763104351884.dkr.ecr.{{ AWS_REGION }}.amazonaws.com"
+  - name: Pull image from ECR
+    command: "docker pull 763104351884.dkr.ecr.{{ AWS_REGION }}.amazonaws.com/tensorflow-training:2.3.0-cpu-py37-ubuntu18.04"
+  - name: Build docker image
+    command: "docker build . -t demo-sagemaker-image"
   - name: list s3 buckets # Just for testing the read writes where granted
     aws_s3_bucket_info:
       aws_access_key: "{{ aws_role.sts_creds.access_key }}"
