@@ -5,8 +5,8 @@
   hosts: local
   gather_facts: False
   environment:
-    AWS_ACCESS_KEY_ID: "AKIAZDHFWCEF6X3DQDMF"
-    AWS_SECRET_ACCESS_KEY: "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"
+    AWS_ACCESS_KEY_ID: "{{ AWS_ACCESS_KEY }}"
+    AWS_SECRET_ACCESS_KEY: "{{ AWS_SECRET_KEY }}"
   # Credentials are set as environment variables
   # Could also be written in ansible vault
   tasks:
@@ -15,11 +15,6 @@
     shell: echo "Pull pre-built docker image from ECR"
   - name: Build training image
     shell: docker build . -t demo-sagemaker-image
-  - name: Get session credentials
-    sts_session_token:
-      duration_seconds: 3600
-    register: session_credentials
-  - debug: msg="{{ session_credentials }}"
   - name: Assume FullSageMaker role
     sts_assume_role:
       role_arn: "{{ AWS_ROLE_ARN }}"
