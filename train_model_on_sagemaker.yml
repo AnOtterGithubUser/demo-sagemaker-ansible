@@ -5,6 +5,7 @@
   hosts: local
   gather_facts: False
   tasks:
+
   - name: Assume FullSageMaker role
     sts_assume_role:
       role_arn: "{{ AWS_ROLE_ARN }}"
@@ -13,7 +14,7 @@
       AWS_ACCESS_KEY_ID: "{{ AWS_ACCESS_KEY }}"
       AWS_SECRET_ACCESS_KEY: "{{ AWS_SECRET_KEY }}"
     register: aws_role
-  - debug: msg="{{ aws_role }}"
+
   - name: Get AWS ECR login
     command: "aws ecr get-login-password --region {{ AWS_REGION }}"
     environment:
@@ -21,26 +22,32 @@
       AWS_SECRET_ACCESS_KEY: "{{ aws_role.sts_creds.secret_key }}"
       AWS_SECURITY_TOKEN: "{{ aws_role.sts_creds.session_token }}"
     register: ecr_login
-  - debug: msg="{{ ecr_login }}"
+
   - name: Login to AWS ECR managed repository
     command: "docker login --username AWS --password {{ ecr_login.stdout }} 763104351884.dkr.ecr.{{ AWS_REGION }}.amazonaws.com"
+
   - name: Pull image from AWS ECR managed repository
     command: "docker pull 763104351884.dkr.ecr.{{ AWS_REGION }}.amazonaws.com/tensorflow-training:2.3.0-cpu-py37-ubuntu18.04"
+
   - name: Build docker image
     command: "docker build . -t demo-sagemaker-image"
-  - name: List s3 buckets # Just for testing the read writes where granted
+
+  - name: List s3 buckets
     aws_s3_bucket_info:
       aws_access_key: "{{ aws_role.sts_creds.access_key }}"
       aws_secret_key: "{{ aws_role.sts_creds.secret_key }}"
       security_token: "{{ aws_role.sts_creds.session_token }}"
     register: s3_buckets
-  - debug: msg="{{ s3_buckets }}" # Should return testfullsagemakerrole bucket info
+
   - name: Login to AWS ECR own repository
     command: "docker login --username AWS --password {{ ecr_login.stdout }} 625399435531.dkr.ecr.{{ AWS_REGION }}.amazonaws.com"
+
   - name: Tag docker image to AWS ECR own repository
     command: "docker tag demo-sagemaker-image:latest 625399435531.dkr.ecr.{{ AWS_REGION }}.amazonaws.com/demo-sagemaker:latest"
+
   - name: Push docker image to AWS ECR own repository
     command: "docker push 625399435531.dkr.ecr.{{ AWS_REGION }}.amazonaws.com/demo-sagemaker:latest"
+
   - name: Run SageMaker training job
     run_sagemaker:
       aws_access_key: "{{ aws_role.sts_creds.access_key }}"
@@ -49,4 +56,4 @@
       training_image: "625399435531.dkr.ecr.{{ AWS_REGION }}.amazonaws.com/demo-sagemaker:latest"
       s3_output_path: "s3://{{ s3_buckets.buckets[0].name }}"
     register: sagemaker_response
-  - debug: msg="{{ sagemaker_response }}"
+

@@ -1,6 +1,7 @@
 #!/usr/bin/python
 import boto3
 from ansible.module_utils.basic import AnsibleModule
+from datetime import datetime
 
 
 def build_training_job(
@@ -17,7 +18,7 @@ def build_training_job(
         aws_session_token=security_token,
     )
     training_job = client.create_training_job(
-        TrainingJobName="demo-sagemaker-job",
+        TrainingJobName="demo-sagemaker-job-%s" % datetime.now().strftime("%Hh%Mmn%Ss-%d-%m-%Y"),
         AlgorithmSpecification={
             "TrainingImage": training_image,
             "TrainingInputMode": "File",
