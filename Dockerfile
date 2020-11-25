@@ -7,4 +7,3 @@ COPY application/* /opt/ml/code/
 RUN pip install -r /opt/ml/code/requirements.txt
 
 ENTRYPOINT ["python", "/opt/ml/code/train.py"]
-

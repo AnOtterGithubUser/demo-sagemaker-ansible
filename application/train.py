@@ -4,10 +4,10 @@ from dclick import command_with_config
 from click import option, argument
 
 
-@command_with_config('/opt/ml/code/dclick_config.yml')
-@argument('cmd')
-@option('--epochs', type=int)
-@option('--samples', type=int)
+@command_with_config("/opt/ml/code/dclick_config.yml")
+@argument("cmd")
+@option("--epochs", type=int)
+@option("--samples", type=int)
 def run_training(cmd, epochs, samples):
     print("SageMaker specified cmd %s" % cmd)
     print("Number of epochs: %s" % epochs)
@@ -25,5 +25,5 @@ def run_training(cmd, epochs, samples):
     model.save("/opt/ml/model/")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     run_training()
