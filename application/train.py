@@ -1,14 +1,17 @@
 from sklearn.datasets import make_regression
 import tensorflow as tf
 from dclick import command_with_config
-from click import option
+from click import option, argument
 
 
-@command_with_config('dclick_config.yml')
+@command_with_config('/opt/ml/code/dclick_config.yml')
+@argument('cmd')
 @option('--epochs', type=int)
 @option('--samples', type=int)
-def run_training(epochs, samples):
-
+def run_training(cmd, epochs, samples):
+    print("SageMaker specified cmd %s" % cmd)
+    print("Number of epochs: %s" % epochs)
+    print("Number of samples: %s" % samples)
     X, y = make_regression(n_samples=samples)
 
     model = tf.keras.Sequential()
@@ -20,6 +23,7 @@ def run_training(epochs, samples):
     model.fit(X, y, epochs=epochs)
 
     model.save("/opt/ml/model/")
+
 
 if __name__ == '__main__':
     run_training()
