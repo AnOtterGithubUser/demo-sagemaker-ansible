@@ -57,3 +57,16 @@
       s3_output_path: "s3://{{ s3_buckets.buckets[0].name }}"
     register: sagemaker_response
 
+  - name: Wait for the previous task to complete
+    wait_for:
+      timeout: 360
+
+  - name: Retrieve trained model from S3
+    aws_s3:
+      aws_access_key: "{{ aws_role.sts_creds.access_key }}"
+      aws_secret_key: "{{ aws_role.sts_creds.secret_key }}"
+      security_token: "{{ aws_role.sts_creds.session_token }}"
+      bucket: "demo-sagemaker-artifacts"
+      object: "/{{ sagemaker_response.JobName }}/output/model.tar.gz"
+      dest: "/Users/thomaspesneau/Documents/Projects/demo-ansible-sagemaker/models/model.tar.gz"
+      mode: "get"

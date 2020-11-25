@@ -11,6 +11,10 @@ def build_training_job(
     training_image="625399435531.dkr.ecr.eu-west-1.amazonaws.com/demo-sagemaker:latest",
     s3_output_path="s3://demo-sagemaker-artifacts/",
 ):
+
+    training_job_arn = "demo-sagemaker-job-%s" % datetime.now().strftime(
+        "%Hh%Mmn%Ss-%d-%m-%Y"
+    )
     client = boto3.client(
         "sagemaker",
         aws_access_key_id=aws_access_key,
@@ -18,7 +22,7 @@ def build_training_job(
         aws_session_token=security_token,
     )
     training_job = client.create_training_job(
-        TrainingJobName="demo-sagemaker-job-%s" % datetime.now().strftime("%Hh%Mmn%Ss-%d-%m-%Y"),
+        TrainingJobName=training_job_arn,
         AlgorithmSpecification={
             "TrainingImage": training_image,
             "TrainingInputMode": "File",
@@ -33,6 +37,7 @@ def build_training_job(
         StoppingCondition={"MaxRuntimeInSeconds": 1200},  # 20mn
         Tags=[{"Key": "demo", "Value": "sagemaker"}],
     )
+    training_job.update({"JobName": training_job_arn})
     return training_job
 
 
