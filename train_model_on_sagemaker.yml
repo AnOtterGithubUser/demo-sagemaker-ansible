@@ -57,10 +57,6 @@
       s3_output_path: "s3://{{ s3_buckets.buckets[0].name }}"
     register: sagemaker_response
 
-  - name: Print training job
-    debug:
-      msg: "{{ sagemaker_response }}"
-
   - name: Wait for job to complete...
     get_job_status:
       aws_access_key: "{{ aws_role.sts_creds.access_key }}"
@@ -70,10 +66,6 @@
       wait_between_tries: "{{ WAIT_BETWEEN_TRIES }}"
       duration_threshold: "{{ DURATION_THRESHOLD }}"
     register: training_job_status
-
-  - name: Training job final status
-    debug:
-      msg: "{{ training_job_status }}"
 
   - name: Retrieve trained model from S3
     aws_s3:
