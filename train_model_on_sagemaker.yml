@@ -74,5 +74,5 @@
       security_token: "{{ aws_role.sts_creds.session_token }}"
       bucket: "demo-sagemaker-artifacts"
       object: "/{{ sagemaker_response.JobName }}/output/model.tar.gz"
-      dest: "/Users/thomaspesneau/Documents/Projects/demo-ansible-sagemaker/models/model.tar.gz"
+      dest: "{{ DESTINATION_FOLDER }}/{{ DESTINATION_FILENAME}}_{{ lookup('pipe','date +%Y-%m-%d-%H-%M-%S')}}.tar.gz"
       mode: "get"

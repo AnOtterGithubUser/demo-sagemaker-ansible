@@ -4,3 +4,5 @@ AWS_REGION: eu-west-1
 DOCKER_IMAGE_NAME: demo-sagemaker
 WAIT_BETWEEN_TRIES: 1
 DURATION_THRESHOLD: 360
+DESTINATION_FOLDER: /Users/thomaspesneau/Documents/Projects/demo-ansible-sagemaker/models
+DESTINATION_FILENAME: dummy_model
